@@ -1,2 +1,3 @@
-# wgo
-Go SDK for accessing the WeChat Open API - In Development
+# WeChat Go SDK *In Development*
+
+A Go SDK for the WeChat Open Platform API.
