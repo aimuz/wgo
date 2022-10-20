@@ -11,7 +11,7 @@ Usage
 ### Client
 
 ```go
-import github.com/aimuz/wgo
+import "github.com/aimuz/wgo"
 ```
 
 ```go
