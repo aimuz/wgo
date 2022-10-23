@@ -1,9 +1,17 @@
 package wgo
 
+import (
+	"github.com/aimuz/wgo/rest"
+	"net/http"
+	"net/url"
+)
+
 const apiBase = "https://api.weixin.qq.com"
 
 type Client struct {
 	config clientConfig
+	base   *url.URL
+	hc     *http.Client
 }
 
 type ClientOption func(*clientConfig)
@@ -30,4 +38,8 @@ func WithToken(token string) ClientOption {
 	return func(c *clientConfig) {
 		c.token = token
 	}
+}
+
+func (c *Client) NewRequest() *rest.Request {
+	return rest.NewRequest(c.base, c.hc)
 }
