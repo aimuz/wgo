@@ -23,7 +23,6 @@ type Request struct {
 	// generic components accessible via method setters
 	verb       string
 	pathPrefix string
-	subpath    string
 	params     url.Values
 	headers    http.Header
 

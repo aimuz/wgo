@@ -1,9 +1,10 @@
 package wgo
 
 import (
-	"github.com/aimuz/wgo/rest"
 	"net/http"
 	"net/url"
+
+	"github.com/aimuz/wgo/rest"
 )
 
 const apiBase = "https://api.weixin.qq.com"
