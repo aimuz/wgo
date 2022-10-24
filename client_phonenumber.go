@@ -2,7 +2,7 @@ package wgo
 
 import "context"
 
-type PhoneNumber struct {
+type GetPhoneNumberResponse struct {
 	PhoneInfo PhoneInfo `json:"phone_info"`
 }
 
@@ -18,15 +18,15 @@ type PhoneInfoWatermark struct {
 	Appid     string `json:"appid"`
 }
 
-func (c *Client) GetPhoneNumber(ctx context.Context, code string) (*PhoneNumber, error) {
-	ret := PhoneNumber{}
+func (c *Client) GetPhoneNumber(ctx context.Context, code string) (*GetPhoneNumberResponse, error) {
+	resp := GetPhoneNumberResponse{}
 	err := c.NewRequest().Get().
 		RequestURI("/wxa/business/getuserphonenumber").
 		Param("code", code).
 		Do(ctx).
-		Into(&ret)
+		Into(&resp)
 	if err != nil {
 		return nil, err
 	}
-	return &ret, err
+	return &resp, err
 }
