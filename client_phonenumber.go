@@ -2,10 +2,12 @@ package wgo
 
 import "context"
 
+// GetPhoneNumberResponse ...
 type GetPhoneNumberResponse struct {
 	PhoneInfo PhoneInfo `json:"phone_info"`
 }
 
+// PhoneInfo ...
 type PhoneInfo struct {
 	PhoneNumber     string             `json:"phoneNumber"`
 	PurePhoneNumber string             `json:"purePhoneNumber"`
@@ -13,11 +15,13 @@ type PhoneInfo struct {
 	Watermark       PhoneInfoWatermark `json:"watermark"`
 }
 
+// PhoneInfoWatermark ...
 type PhoneInfoWatermark struct {
 	Timestamp int    `json:"timestamp"`
 	Appid     string `json:"appid"`
 }
 
+// GetPhoneNumber ...
 func (c *Client) GetPhoneNumber(ctx context.Context, code string) (*GetPhoneNumberResponse, error) {
 	resp := GetPhoneNumberResponse{}
 	err := c.NewRequest().Get().

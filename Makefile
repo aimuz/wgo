@@ -21,7 +21,6 @@ lint: $(FAILLINT) $(GOLANGCI_LINT) $(ERRCHECK) fmt
 
 	@echo ">> linting all of the Go files GOGC=${GOGC}"
 	@$(GOLANGCI_LINT) run
-	@$(ERRCHECK) ./...
 
 	@echo ">> scanning for dependencies the GO files"
 	@$(GOVULNCHECK) ./...

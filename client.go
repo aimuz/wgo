@@ -9,11 +9,13 @@ import (
 
 const apiBase = "https://api.weixin.qq.com"
 
+// Client is a WGo client.
 type Client struct {
 	config clientConfig
 	base   *url.URL
 }
 
+// ClientOption is a client option for the WGo Client config.
 type ClientOption func(*clientConfig)
 
 type clientConfig struct {
@@ -39,6 +41,7 @@ func NewClient(opts ...ClientOption) *Client {
 	return c
 }
 
+// WithAPPIDAndSecret sets the appid and secret for the WGo client
 func WithAPPIDAndSecret(appid string, secret string) ClientOption {
 	return func(c *clientConfig) {
 		c.appid = appid
@@ -46,18 +49,21 @@ func WithAPPIDAndSecret(appid string, secret string) ClientOption {
 	}
 }
 
+// WithToken sets the token for the WGo client
 func WithToken(token string) ClientOption {
 	return func(c *clientConfig) {
 		c.token = token
 	}
 }
 
+// WithHTTPClient sets the http client for the WGo client
 func WithHTTPClient(client *http.Client) ClientOption {
 	return func(c *clientConfig) {
 		c.hc = client
 	}
 }
 
+// NewRequest creates a new request
 func (c *Client) NewRequest() *rest.Request {
 	return rest.NewRequest(c.base, c.config.hc)
 }

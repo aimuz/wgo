@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
@@ -15,6 +14,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+// Request ...
 type Request struct {
 	// base is the root URL for all invocations of the client
 	base *url.URL
@@ -31,6 +31,7 @@ type Request struct {
 	body io.Reader
 }
 
+// NewRequest returns a new request object.
 func NewRequest(base *url.URL, hc *http.Client) *Request {
 	return &Request{
 		base: base,
@@ -38,22 +39,27 @@ func NewRequest(base *url.URL, hc *http.Client) *Request {
 	}
 }
 
+// Post sends a POST request
 func (r *Request) Post() *Request {
 	return r.Verb(http.MethodPost)
 }
 
+// Put sends a PUT request
 func (r *Request) Put() *Request {
 	return r.Verb(http.MethodPut)
 }
 
+// Patch sends a PATCH request
 func (r *Request) Patch() *Request {
 	return r.Verb(http.MethodPatch)
 }
 
+// Get sends a GET request
 func (r *Request) Get() *Request {
 	return r.Verb(http.MethodGet)
 }
 
+// Delete sends a DELETE request
 func (r *Request) Delete() *Request {
 	return r.Verb(http.MethodDelete)
 }
@@ -117,6 +123,7 @@ func (r *Request) setParam(paramName, value string) *Request {
 	return r
 }
 
+// SetHeader sets the request header
 func (r *Request) SetHeader(key string, values ...string) *Request {
 	if r.headers == nil {
 		r.headers = http.Header{}
@@ -128,6 +135,7 @@ func (r *Request) SetHeader(key string, values ...string) *Request {
 	return r
 }
 
+// Body ...
 func (r *Request) Body(val interface{}) *Request {
 	switch v := val.(type) {
 	case string:
@@ -176,6 +184,7 @@ func (r *Request) newHTTPRequest(ctx context.Context) (*http.Request, error) {
 	return req, nil
 }
 
+// Do sends an request and returns Result
 func (r *Request) Do(ctx context.Context) Result {
 	if r.err != nil {
 		return Result{
@@ -217,15 +226,17 @@ func readAndCloseResponseBody(resp *http.Response) {
 	// before we reconnect, so that we reuse the same TCP
 	// connection.
 	const maxBodySlurpSize = 2 << 10
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.ContentLength <= maxBodySlurpSize {
-		_, _ = io.Copy(ioutil.Discard, &io.LimitedReader{R: resp.Body, N: maxBodySlurpSize})
+		_, _ = io.Copy(io.Discard, &io.LimitedReader{R: resp.Body, N: maxBodySlurpSize})
 	}
 }
 
-func (r *Request) transformResponse(req *http.Request, resp *http.Response) Result {
-	b, err := ioutil.ReadAll(resp.Body)
+func (r *Request) transformResponse(_ *http.Request, resp *http.Response) Result {
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return Result{err: err}
 	}
@@ -236,22 +247,25 @@ func (r *Request) transformResponse(req *http.Request, resp *http.Response) Resu
 	}
 }
 
+// Result is the result of transforming a request
 type Result struct {
-	body        []byte
-	err         error
-	contentType string
-	statusCode  int
+	body       []byte
+	err        error
+	statusCode int
 }
 
+// Error ...
 type Error struct {
 	ErrCode int
 	ErrMsg  string
 }
 
+// Error implements the error interface
 func (e Error) Error() string {
 	return fmt.Sprintf("errCode: %d, errMsg: %s", e.ErrCode, e.ErrMsg)
 }
 
+// NewError ...
 func NewError(errCode int, errMsg string) error {
 	return &Error{
 		ErrCode: errCode,
@@ -259,6 +273,7 @@ func NewError(errCode int, errMsg string) error {
 	}
 }
 
+// Into ...
 func (r Result) Into(val interface{}) error {
 	if r.err != nil {
 		return r.err

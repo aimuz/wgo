@@ -2,6 +2,7 @@ package wgo
 
 import "context"
 
+// ClearQuota ...
 func (c *Client) ClearQuota(ctx context.Context) error {
 	resp := struct{}{}
 	err := c.NewRequest().Post().
@@ -12,16 +13,19 @@ func (c *Client) ClearQuota(ctx context.Context) error {
 	return err
 }
 
+// GetAPIQuotaResponse ...
 type GetAPIQuotaResponse struct {
 	Quota GetAPIQuota `json:"quota"`
 }
 
+// GetAPIQuota ...
 type GetAPIQuota struct {
 	DailyLimit int `json:"daily_limit"`
 	Used       int `json:"used"`
 	Remain     int `json:"remain"`
 }
 
+// GetAPIQuota ...
 func (c *Client) GetAPIQuota(ctx context.Context, cgiPath string) (*GetAPIQuotaResponse, error) {
 	resp := GetAPIQuotaResponse{}
 	err := c.NewRequest().Post().
@@ -35,19 +39,22 @@ func (c *Client) GetAPIQuota(ctx context.Context, cgiPath string) (*GetAPIQuotaR
 	return &resp, err
 }
 
+// GetRidInfoResponse ...
 type GetRidInfoResponse struct {
 	Request GetRidInfo `json:"request"`
 }
 
+// GetRidInfo ...
 type GetRidInfo struct {
 	InvokeTime   int    `json:"invoke_time"`
 	CostInMs     int    `json:"cost_in_ms"`
-	RequestUrl   string `json:"request_url"`
+	RequestURL   string `json:"request_url"`
 	RequestBody  string `json:"request_body"`
 	ResponseBody string `json:"response_body"`
-	ClientIp     string `json:"client_ip"`
+	ClientIP     string `json:"client_ip"`
 }
 
+// GetRidInfo ...
 func (c *Client) GetRidInfo(ctx context.Context, rid string) (*GetRidInfoResponse, error) {
 	resp := GetRidInfoResponse{}
 	err := c.NewRequest().Post().
@@ -61,6 +68,7 @@ func (c *Client) GetRidInfo(ctx context.Context, rid string) (*GetRidInfoRespons
 	return &resp, err
 }
 
+// ClearQuotaByAppSecret ...
 func (c *Client) ClearQuotaByAppSecret(ctx context.Context) error {
 	resp := struct{}{}
 	err := c.NewRequest().Post().
