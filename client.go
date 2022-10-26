@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"golang.org/x/oauth2"
+
 	"github.com/aimuz/wgo/rest"
 )
 
@@ -60,6 +62,18 @@ func WithToken(token string) ClientOption {
 func WithHTTPClient(client *http.Client) ClientOption {
 	return func(c *clientConfig) {
 		c.hc = client
+	}
+}
+
+// WithTokenSource sets the token source for the WGo client
+func WithTokenSource(tokenSource oauth2.TokenSource) ClientOption {
+	return func(c *clientConfig) {
+		c.hc = &http.Client{
+			Transport: &RoundTripper{
+				next:        http.DefaultTransport,
+				TokenSource: tokenSource,
+			},
+		}
 	}
 }
 
