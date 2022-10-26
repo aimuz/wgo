@@ -2,14 +2,12 @@ package wgo
 
 import (
 	"net/http"
-
-	"golang.org/x/oauth2"
 )
 
 // RoundTripper is a RoundTripper that implements the http.RoundTripper interface
 type RoundTripper struct {
 	next        http.RoundTripper
-	TokenSource oauth2.TokenSource
+	TokenSource TokenSource
 }
 
 // RoundTrip Add the AccessToken parameter to the request
