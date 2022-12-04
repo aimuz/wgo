@@ -45,3 +45,7 @@ linters:
     - typecheck
     - unused
     - varcheck
+
+linters-settings:
+  errcheck:
+    ignoretests:
