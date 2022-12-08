@@ -26,7 +26,7 @@ client := wgo.NewClient(wgo.WithAPPIDAndSecret("<APPID>", "<SECRET>"))
 Roadmap
 -------
 
- [x] TODO
+- [ ] TODO
 
 Contributors
 ------------
