@@ -82,8 +82,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SignatureError signature mismatch
-var SignatureError = errors.New("signature mismatch")
+// ErrSignatureMismatch signature mismatch
+var ErrSignatureMismatch = errors.New("signature mismatch")
 
 // ValidateWebhook ...
 func ValidateWebhook(r *http.Request, token string) (msg *Message, encrypted bool, err error) {
@@ -118,7 +118,7 @@ func ValidateWebhook(r *http.Request, token string) (msg *Message, encrypted boo
 	h.Write([]byte(strings.Join(args, "")))
 	hashcode := hex.EncodeToString(h.Sum(nil))
 	if signature != hashcode {
-		return msg, encrypted, SignatureError
+		return msg, encrypted, ErrSignatureMismatch
 	}
 	return msg, encrypted, nil
 }
