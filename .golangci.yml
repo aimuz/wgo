@@ -21,8 +21,6 @@ linters:
     - nilerr
     - predeclared
     - revive
-    - rowserrcheck
-    - sqlclosecheck
     - tparallel
     - unconvert
     - unparam
