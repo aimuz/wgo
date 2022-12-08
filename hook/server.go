@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/xml"
+	"errors"
 	"net/http"
 	"sort"
 	"strings"
@@ -38,18 +39,19 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	msgType, msg, _, ok := ValidateWebhook(w, r, token)
-	if !ok {
+	msg, _, err := ValidateWebhook(r, token)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	echostr := r.URL.Query().Get("echostr")
-	if len(echostr) > 0 && r.Method == http.MethodGet {
+	if len(echostr) > 0 && msg.MsgType == "Validate" {
 		_, _ = w.Write([]byte(echostr))
 		return
 	}
 
-	reply, err := s.handleMessage(appid, msgType, msg)
+	reply, err := s.handleMessage(appid, msg.MsgType, msg)
 	if err != nil {
 		return
 	}
@@ -80,23 +82,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var SignatureError = errors.New("signature mismatch")
+
 // ValidateWebhook ...
-func ValidateWebhook(w http.ResponseWriter, r *http.Request, token string) (string, *Message, bool, bool) {
+func ValidateWebhook(r *http.Request, token string) (msg *Message, encrypted bool, err error) {
 	query := r.URL.Query()
 	signature := query.Get("signature")
 	timestamp := query.Get("timestamp")
 	nonce := query.Get("nonce")
 
-	msg := Message{}
-	decoder := xml.NewDecoder(r.Body)
-	err := decoder.Decode(&msg)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return "", nil, false, false
+	msg = &Message{
+		MsgType: "Validate",
 	}
-	defer r.Body.Close() // nolint: errcheck
 
-	encrypted := false
+	if r.Method == http.MethodPost {
+		decoder := xml.NewDecoder(r.Body)
+		err = decoder.Decode(msg)
+		if err != nil {
+			return
+		}
+		defer r.Body.Close() // nolint: errcheck
+	}
+
 	if len(msg.Encrypt) > 0 {
 		encrypted = true
 	}
@@ -110,8 +117,7 @@ func ValidateWebhook(w http.ResponseWriter, r *http.Request, token string) (stri
 	h.Write([]byte(strings.Join(args, "")))
 	hashcode := hex.EncodeToString(h.Sum(nil))
 	if signature != hashcode {
-		http.Error(w, "signature mismatch", http.StatusBadRequest)
-		return "", nil, encrypted, false
+		return msg, encrypted, SignatureError
 	}
-	return msg.MsgType, &msg, encrypted, true
+	return msg, encrypted, nil
 }
