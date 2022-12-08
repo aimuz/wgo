@@ -82,6 +82,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// SignatureError signature mismatch
 var SignatureError = errors.New("signature mismatch")
 
 // ValidateWebhook ...
