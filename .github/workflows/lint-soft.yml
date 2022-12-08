@@ -2,12 +2,10 @@ name: lint-soft
 on:
   push:
   pull_request:
-
 permissions:
   contents: read
   # Optional: allow read access to pull request. Use with `only-new-issues` option.
   pull-requests: read
-
 jobs:
   golangci:
     name: lint-soft
@@ -17,7 +15,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ^1
-
       - uses: actions/checkout@v3
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3

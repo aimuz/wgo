@@ -10,6 +10,9 @@ fmt: $(GOIMPORTS)
 	@echo ">> formatting go code"
 	@$(GOIMPORTS) -local $(GO_PKG) -w $(GO_FILES)
 
+	@echo ">> formatting yaml file"
+	@$(YAMLFMT)
+
 .PHONY: lint
 lint: ## lint code
 lint: $(FAILLINT) $(GOLANGCI_LINT) $(ERRCHECK) fmt

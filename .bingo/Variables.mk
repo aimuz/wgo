@@ -53,3 +53,9 @@ $(GOVULNCHECK): $(BINGO_DIR)/govulncheck.mod
 	@echo "(re)installing $(GOBIN)/govulncheck-v0.0.0-20221122171214-05fb7250142c"
 	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=govulncheck.mod -o=$(GOBIN)/govulncheck-v0.0.0-20221122171214-05fb7250142c "golang.org/x/vuln/cmd/govulncheck"
 
+YAMLFMT := $(GOBIN)/yamlfmt-v0.6.0
+$(YAMLFMT): $(BINGO_DIR)/yamlfmt.mod
+	@# Install binary/ries using Go 1.14+ build command. This is using bwplotka/bingo-controlled, separate go module with pinned dependencies.
+	@echo "(re)installing $(GOBIN)/yamlfmt-v0.6.0"
+	@cd $(BINGO_DIR) && GOWORK=off $(GO) build -mod=mod -modfile=yamlfmt.mod -o=$(GOBIN)/yamlfmt-v0.6.0 "github.com/google/yamlfmt/cmd/yamlfmt"
+
