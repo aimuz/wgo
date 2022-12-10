@@ -1,124 +1,152 @@
 package hook
 
 import (
-	// #nosec
-	"crypto/sha1"
+	"crypto/sha1" // #nosec
 	"encoding/hex"
 	"encoding/xml"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"sort"
 	"strings"
-	"time"
 )
 
 // GetTokenFunc ...
-type GetTokenFunc func(appid string) (string, error)
+type GetTokenFunc func() (string, error)
 
 // MessageHandle ...
-type MessageHandle func(appid string, msgType string, msg *Message) (Messager, error)
+type MessageHandle func(msg *Message) (Messager, error)
 
 // Server implements http.Handler. It validates incoming WeChat Public Platform webhooks and
 // then dispatches them to the appropriate plugins.
 type Server struct {
-	getToken      GetTokenFunc
-	handleMessage MessageHandle
+	token  string
+	appID  string
+	aesKey string
+	//messageHandle MessageHandle
 }
 
 // NewServer not implemented
-func NewServer() *Server {
-	return &Server{}
+func NewServer(appid, token, aesKey string) *Server {
+	return &Server{
+		appID:  appid,
+		token:  token,
+		aesKey: aesKey,
+	}
 }
 
-// ServeHTTP ...
+// ServeHTTP implements an http.Handler that answers callback requests.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	appid := r.URL.Query().Get("appid")
-	token, err := s.getToken(appid)
-	if err != nil {
-		// TODO
+	// this is the request for verification
+	if r.Method == http.MethodGet {
+		DefaultEchoHandle(s.token, w, r)
 		return
 	}
 
-	msg, _, err := ValidateWebhook(r, token)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	echostr := r.URL.Query().Get("echostr")
-	if len(echostr) > 0 && msg.MsgType == "Validate" {
-		_, _ = w.Write([]byte(echostr))
-		return
-	}
-
-	reply, err := s.handleMessage(appid, msg.MsgType, msg)
-	if err != nil {
-		return
-	}
-
-	replyMsg := &Message{
-		ToUserName:   msg.FromUserName,
-		FromUserName: msg.ToUserName,
-		CreateTime:   time.Now().Unix(),
-	}
-	switch t := reply.(type) {
-	case *TextMessage:
-		replyMsg.MsgType = "text"
-		replyMsg.Content = t.Content
-	case *ImageMessage:
-	case *VoiceMessage:
-	case *VideoMessage:
-	case *MusicMessage:
-	case *ArticleMessage:
-	}
-
-	//if encrypted {
-	// TODO Support Encrypt Msg
+	//query := r.URL.Query()
+	//openid := query.Get("openid")
+	//
+	//msg, encrypted, err := ValidateWebhook(r, s.token)
+	//if err != nil {
+	//	http.Error(w, err.Error(), http.StatusBadRequest)
+	//	return
 	//}
+	//
+	//// DecryptMsg
+	//if encrypted {
+	//
+	//}
+	//
+	//reply, err := s.messageHandle(msg)
+	//if err != nil {
+	//	return
+	//}
+	//
+	//replyMsg := &Message{
+	//	ToUserName:   msg.FromUserName,
+	//	FromUserName: msg.ToUserName,
+	//	CreateTime:   time.Now().Unix(),
+	//}
+	//switch t := reply.(type) {
+	//case *TextMessage:
+	//	replyMsg.MsgType = "text"
+	//	replyMsg.Content = t.Content
+	//case *ImageMessage:
+	//case *VoiceMessage:
+	//case *VideoMessage:
+	//case *MusicMessage:
+	//case *ArticleMessage:
+	//}
+	//
+	//err = xml.NewEncoder(w).Encode(replyMsg)
+	//if err != nil {
+	//	return
+	//}
+}
 
-	err = xml.NewEncoder(w).Encode(replyMsg)
-	if err != nil {
+// DefaultEchoHandle This is the default Echo Handle, which will be used when WeChat Public sends an authentication request
+func DefaultEchoHandle(token string, w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	signature := query.Get("signature")
+	timestamp := query.Get("timestamp")
+	nonce := query.Get("nonce")
+	hashcode := SHA1Sign(timestamp, nonce, token)
+	if signature != hashcode {
+		http.Error(w, ErrSignatureMismatch.Error(), http.StatusBadRequest)
 		return
 	}
+	echo := r.URL.Query().Get("echostr")
+	_, _ = fmt.Fprint(w, echo)
 }
 
 // ErrSignatureMismatch signature mismatch
 var ErrSignatureMismatch = errors.New("signature mismatch")
 
+// ErrEmptyBody ...
+var ErrEmptyBody = errors.New("empty body")
+
 // ValidateWebhook ...
-func ValidateWebhook(r *http.Request, token string) (msg *Message, encrypted bool, err error) {
+func ValidateWebhook(r *http.Request, token string) (payload []byte, encrypted bool, err error) {
+	fail := func(err error) ([]byte, bool, error) { return nil, false, err }
+
 	query := r.URL.Query()
 	signature := query.Get("signature")
 	timestamp := query.Get("timestamp")
 	nonce := query.Get("nonce")
 
-	msg = &Message{
-		MsgType: "Validate",
+	defer r.Body.Close() // nolint: errcheck
+	payload, err = io.ReadAll(r.Body)
+	if err != nil {
+		return fail(err)
 	}
-
-	if r.Method == http.MethodPost {
-		decoder := xml.NewDecoder(r.Body)
-		err = decoder.Decode(msg)
-		if err != nil {
-			return
-		}
-		defer r.Body.Close() // nolint: errcheck
+	if len(payload) == 0 {
+		return fail(ErrEmptyBody)
+	}
+	msg := &Message{}
+	err = xml.Unmarshal(payload, msg)
+	if err != nil {
+		return fail(err)
 	}
 
 	if len(msg.Encrypt) > 0 {
 		encrypted = true
+		payload = []byte(msg.Encrypt)
 	}
 
-	// TODO Support Encrypt Msg
-	args := []string{timestamp, nonce, token, msg.Encrypt}
+	hashcode := SHA1Sign(timestamp, nonce, token, msg.Encrypt)
+	if signature != hashcode {
+		return fail(ErrSignatureMismatch)
+	}
+	return payload, encrypted, nil
+}
+
+// SHA1Sign Computing signatures using sha1
+func SHA1Sign(args ...string) string {
 	sort.Strings(args)
 
-	// #nosec
-	h := sha1.New()
+	h := sha1.New() // #nosec
 	h.Write([]byte(strings.Join(args, "")))
 	hashcode := hex.EncodeToString(h.Sum(nil))
-	if signature != hashcode {
-		return msg, encrypted, ErrSignatureMismatch
-	}
-	return msg, encrypted, nil
+	return hashcode
 }

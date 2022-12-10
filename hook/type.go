@@ -34,6 +34,18 @@ type Message struct {
 	//Articles *CallArticles `xml:"Articles"` // 消息为 news 可用
 }
 
+// EncryptMessage ...
+type EncryptMessage struct {
+	// Encrypt ...
+	Encrypt string `xml:"Encrypt"`
+	// MsgSignature ...
+	MsgSignature string `xml:"MsgSignature"`
+	// TimeStamp ...
+	TimeStamp int64 `xml:"TimeStamp"`
+	// Nonce ...
+	Nonce string `xml:"Nonce"`
+}
+
 // Messager ..
 type Messager interface {
 	_is()
