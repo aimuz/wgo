@@ -1,10 +1,7 @@
-package hook
+package webhook
 
-// Message ...
-type Message struct {
-	// Encrypt
-	Encrypt string `xml:"Encrypt"`
-
+// PlainMessage ...
+type PlainMessage struct {
 	// ToUserName 开发者微信号
 	ToUserName string `xml:"ToUserName"`
 
@@ -44,6 +41,8 @@ type EncryptMessage struct {
 	TimeStamp int64 `xml:"TimeStamp"`
 	// Nonce ...
 	Nonce string `xml:"Nonce"`
+
+	PlainMessage
 }
 
 // Messager ..
