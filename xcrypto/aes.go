@@ -26,7 +26,7 @@ func (w *AESUseCBCWithPKCS7) Encrypt(plain []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	const blockSize = 32
+	var blockSize = c.BlockSize()
 	msg, err := PKCS7Padding(plain, blockSize)
 	if err != nil {
 		return nil, err
