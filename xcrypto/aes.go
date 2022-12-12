@@ -27,7 +27,7 @@ func (w *AESUseCBCWithPKCS7) Encrypt(plain []byte) ([]byte, error) {
 	}
 
 	const blockSize = 32
-	msg, err := PKCS7Pad(plain, blockSize)
+	msg, err := PKCS7Padding(plain, blockSize)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (w *AESUseCBCWithPKCS7) Decrypt(encrypt []byte) ([]byte, error) {
 	encrypter := cipher.NewCBCDecrypter(c, w.iv)
 	encrypter.CryptBlocks(encrypt, encrypt)
 
-	plain, err := PKCS7Unpad(encrypt)
+	plain, err := PKCS7Unpadding(encrypt)
 	if err != nil {
 		return nil, err
 	}
