@@ -15,7 +15,7 @@ fmt: $(GOIMPORTS) $(YAMLFMT)
 
 .PHONY: lint
 lint: ## lint code
-lint: $(FAILLINT) $(GOLANGCI_LINT) $(ERRCHECK)
+lint: $(FAILLINT) $(GOLANGCI_LINT) $(ERRCHECK) $(GOVULNCHECK)
 	@echo ">> verifying modules being imported"
 	@$(FAILLINT) -paths "github.com/pkg/errors=errors,fmt.{Print,Printf,Println},log" ./...
 
