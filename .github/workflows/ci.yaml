@@ -20,18 +20,13 @@ jobs:
         with:
           go-version: ^1
       - uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          # Optional: golangci-lint command line arguments.
-          #args:
-          # Optional: show only new issues if it's a pull request. The default value is `false`.
-          only-new-issues: true
+      - name: Run Make Lint
+        run: make lint
   test:
     needs: lint
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         go: [1.16, 1.17, 1.18, 1.19]
         test-tags: ['', '-tags nomsgpack', '-tags "sonic avx"', '-tags go_json']
         include:
@@ -63,11 +58,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Run Tests
-        run: make test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          flags: ${{ matrix.os }},go-${{ matrix.go }},${{ matrix.test-tags }}
+        run: go test ./...
       - name: Format
         if: matrix.go-version == '1.19.x'
-        run: diff -u <(echo -n) <(gofmt -d .)
+        run: make fmt git diff HEAD if [ $c -eq 0 ]; then; echo "No changes"; exit 0; fi exit 1
