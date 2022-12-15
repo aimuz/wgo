@@ -6,7 +6,7 @@ GO_FILES       ?= $(shell find . -type f -name "*.go" -not -path "*vendor*" -not
 
 .PHONY: fmt
 fmt: ## format code
-fmt: $(GOIMPORTS)
+fmt: $(GOIMPORTS) $(YAMLFMT)
 	@echo ">> formatting go code"
 	@$(GOIMPORTS) -local $(GO_PKG) -w $(GO_FILES)
 
@@ -15,7 +15,7 @@ fmt: $(GOIMPORTS)
 
 .PHONY: lint
 lint: ## lint code
-lint: $(FAILLINT) $(GOLANGCI_LINT) $(ERRCHECK) fmt
+lint: $(FAILLINT) $(GOLANGCI_LINT) $(ERRCHECK)
 	@echo ">> verifying modules being imported"
 	@$(FAILLINT) -paths "github.com/pkg/errors=errors,fmt.{Print,Printf,Println},log" ./...
 
