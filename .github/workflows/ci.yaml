@@ -38,16 +38,10 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: [ubuntu-latest]
         go: [1.16, 1.17, 1.18, 1.19]
         test-tags: ['', '-tags nomsgpack', '-tags "sonic avx"', '-tags go_json']
-        include:
-          - os: ubuntu-latest
-            go-build: ~/.cache/go-build
-          - os: macos-latest
-            go-build: ~/Library/Caches/go-build
-    name: ${{ matrix.os }} @ Go ${{ matrix.go }} ${{ matrix.test-tags }}
-    runs-on: ${{ matrix.os }}
+    name: Go ${{ matrix.go }} ${{ matrix.test-tags }}
+    runs-on: ubuntu-latest
     env:
       GO111MODULE: on
       GOPROXY: https://proxy.golang.org
@@ -63,7 +57,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: |
-            ${{ matrix.go-build }}
+            ~/.cache/go-build
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
