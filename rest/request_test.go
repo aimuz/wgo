@@ -16,12 +16,7 @@ func TestResult_Into(t *testing.T) {
 		fields  fields
 		args    args
 		wantErr bool
-	}{
-		{
-			name: "is error",
-			args: args{},
-		},
-	}
+	}{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Result{
