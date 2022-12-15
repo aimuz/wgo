@@ -43,10 +43,11 @@ func (w *AESUseCBCWithPKCS7) Decrypt(encrypt []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	plain := make([]byte, len(encrypt))
 	encrypter := cipher.NewCBCDecrypter(c, w.iv)
-	encrypter.CryptBlocks(encrypt, encrypt)
+	encrypter.CryptBlocks(plain, encrypt)
 
-	plain, err := PKCS7Unpadding(encrypt)
+	plain, err = PKCS7Unpadding(plain)
 	if err != nil {
 		return nil, err
 	}

@@ -27,3 +27,8 @@ lint: $(FAILLINT) $(GOLANGCI_LINT) $(ERRCHECK) $(GOVULNCHECK)
 
 	@echo ">> scanning for dependencies the GO files"
 	@$(GOVULNCHECK) ./...
+
+.PHONY: test
+lint: ## test
+test:
+	go test ./...
