@@ -61,7 +61,7 @@ func NewServer(appid string, opts ...Option) (*Server, error) {
 
 func (s *Server) init() error {
 	if len(s.aesKey) > 0 {
-		c, err := NewWXBizMsgCrypt(s.aesKey, s.appID, s.token)
+		c, err := NewWXBizMsgCrypto(s.aesKey, s.appID, s.token)
 		if err != nil {
 			return err
 		}

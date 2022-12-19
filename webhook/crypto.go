@@ -8,27 +8,27 @@ import (
 	"github.com/aimuz/wgo/xcrypto"
 )
 
-// WXBizMsgCrypto ...
-type WXBizMsgCrypto interface {
+// WXBizMsgCryptor ...
+type WXBizMsgCryptor interface {
 	DecryptMessage(payload []byte, v interface{}) error
 	EncryptMessage(payload []byte, timestamp int64, nonce string) ([]byte, error)
 }
 
-// WXBizMsgCrypt ...
-type WXBizMsgCrypt struct {
+// WXBizMsgCrypto ...
+type WXBizMsgCrypto struct {
 	appID string
 	token string
 
 	crypto xcrypto.Crypto
 }
 
-// NewWXBizMsgCrypt ...
-func NewWXBizMsgCrypt(encodingAESKey, appID, token string) (*WXBizMsgCrypt, error) {
+// NewWXBizMsgCrypto ...
+func NewWXBizMsgCrypto(encodingAESKey, appID, token string) (*WXBizMsgCrypto, error) {
 	c, err := xcrypto.NewWXCrypt(encodingAESKey, appID)
 	if err != nil {
 		return nil, err
 	}
-	return &WXBizMsgCrypt{
+	return &WXBizMsgCrypto{
 		appID:  appID,
 		token:  token,
 		crypto: c,
@@ -36,7 +36,7 @@ func NewWXBizMsgCrypt(encodingAESKey, appID, token string) (*WXBizMsgCrypt, erro
 }
 
 // DecryptMessage ...
-func (wc *WXBizMsgCrypt) DecryptMessage(payload []byte, v interface{}) error {
+func (wc *WXBizMsgCrypto) DecryptMessage(payload []byte, v interface{}) error {
 	if wc.crypto == nil {
 		return errors.New("crypto: wc.crypto not init")
 	}
@@ -54,7 +54,7 @@ func (wc *WXBizMsgCrypt) DecryptMessage(payload []byte, v interface{}) error {
 }
 
 // EncryptMessage ...
-func (wc *WXBizMsgCrypt) EncryptMessage(payload []byte, timestamp int64, nonce string) ([]byte, error) {
+func (wc *WXBizMsgCrypto) EncryptMessage(payload []byte, timestamp int64, nonce string) ([]byte, error) {
 	sign := SHA1Sign(strconv.FormatInt(timestamp, 10), wc.token, nonce, string(payload))
 	msg := &EncryptMessage{
 		Encrypt:      string(payload),
