@@ -26,7 +26,7 @@ type Server struct {
 	token         string
 	appID         string
 	aesKey        string
-	crypto        WXBizMsgCrypto
+	crypto        WXBizMsgCryptor
 	messageHandle MessageHandle
 }
 
