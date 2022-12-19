@@ -7,18 +7,20 @@ import (
 
 // AESUseCBCWithPKCS7 This will be filled using PKCS7 and finally encrypted using AES CBC mode
 type AESUseCBCWithPKCS7 struct {
-	key []byte
-	iv  []byte
+	key       []byte
+	iv        []byte
+	blockSize int
 }
 
 // NewAESUseCBCWithPKCS7 creates a new AESUseCBCWithPKCS7 structure.
 //
 // The key parameter is the key. The iv parameter is the initialization vector.
 // The function returns a pointer to a new AESUseCBCWithPKCS7 structure.
-func NewAESUseCBCWithPKCS7(key, iv []byte) *AESUseCBCWithPKCS7 {
+func NewAESUseCBCWithPKCS7(key, iv []byte, blockSize int) *AESUseCBCWithPKCS7 {
 	return &AESUseCBCWithPKCS7{
-		key: key,
-		iv:  iv,
+		key:       key,
+		iv:        iv,
+		blockSize: blockSize,
 	}
 }
 
@@ -29,8 +31,7 @@ func (w *AESUseCBCWithPKCS7) Encrypt(src []byte) (dst []byte, err error) {
 		return nil, err
 	}
 
-	var blockSize = c.BlockSize()
-	dst, err = PKCS7Padding(src, blockSize)
+	dst, err = PKCS7Padding(src, w.blockSize)
 	if err != nil {
 		return nil, err
 	}

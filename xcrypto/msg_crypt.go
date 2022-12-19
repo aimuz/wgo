@@ -26,7 +26,7 @@ func NewWXBizMsgCrypt(encodingAESKey, appID string) (*WXBizMsgCrypt, error) {
 		return nil, err
 	}
 
-	aesCrypto := NewAESUseCBCWithPKCS7(aesKey, aesKey[:16])
+	aesCrypto := NewAESUseCBCWithPKCS7(aesKey, aesKey[:16], len(aesKey))
 	wx := &WXBizMsgCrypt{
 		aesCrypto: aesCrypto,
 		appID:     appID,
