@@ -38,7 +38,11 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        go: [1.16, 1.17, 1.18, 1.19]
+        go:
+          - 1.16
+          - 1.17
+          - 1.18
+          - 1.19
     name: Go ${{ matrix.go }}
     runs-on: ubuntu-latest
     env:
