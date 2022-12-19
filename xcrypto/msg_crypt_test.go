@@ -90,7 +90,7 @@ func TestWXBizMsgCrypt_Decrypt(t *testing.T) {
 				aesCrypto: wxc.aesCrypto,
 				appID:     wxc.appID,
 			},
-			args: args{postData: testEnceypt},
+			args: args{postData: testEncrypt},
 			want: xmlPlain,
 		},
 	}

@@ -12,7 +12,7 @@ func TestAESUseCBCWithPKCS7(t *testing.T) {
 
 var testAESKey, _ = base64.StdEncoding.DecodeString("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG=")
 
-var testEnceypt, _ = base64.StdEncoding.DecodeString("hyzAe4OzmOMbd6TvGdIOO6uBmdJoD0Fk53REIHvxYtJlE2B655HuD0m8KUePWB3+LrPXo87wzQ1QLvbeUgmBM4x6F8PGHQHFVAFmOD2LdJF9FrXpbUAh0B5GIItb52sn896wVsMSHGuPE328HnRGBcrS7C41IzDWyWNlZkyyXwon8T332jisa+h6tEDYsVticbSnyU8dKOIbgU6ux5VTjg3yt+WGzjlpKn6NPhRjpA912xMezR4kw6KWwMrCVKSVCZciVGCgavjIQ6X8tCOp3yZbGpy0VxpAe+77TszTfRd5RJSVO/HTnifJpXgCSUdUue1v6h0EIBYYI1BD1DlD+C0CR8e6OewpusjZ4uBl9FyJvnhvQl+q5rv1ixrcpCumEPo5MJSgM9ehVsNPfUM669WuMyVWQLCzpu9GhglF2PE=")
+var testEncrypt, _ = base64.StdEncoding.DecodeString("hyzAe4OzmOMbd6TvGdIOO6uBmdJoD0Fk53REIHvxYtJlE2B655HuD0m8KUePWB3+LrPXo87wzQ1QLvbeUgmBM4x6F8PGHQHFVAFmOD2LdJF9FrXpbUAh0B5GIItb52sn896wVsMSHGuPE328HnRGBcrS7C41IzDWyWNlZkyyXwon8T332jisa+h6tEDYsVticbSnyU8dKOIbgU6ux5VTjg3yt+WGzjlpKn6NPhRjpA912xMezR4kw6KWwMrCVKSVCZciVGCgavjIQ6X8tCOp3yZbGpy0VxpAe+77TszTfRd5RJSVO/HTnifJpXgCSUdUue1v6h0EIBYYI1BD1DlD+C0CR8e6OewpusjZ4uBl9FyJvnhvQl+q5rv1ixrcpCumEPo5MJSgM9ehVsNPfUM669WuMyVWQLCzpu9GhglF2PE=")
 
 var testPlain, _ = base64.StdEncoding.DecodeString("ODk0NjVjODQwYzVmMTE2ZgAAARg8eG1sPjxUb1VzZXJOYW1lPjwhW0NEQVRBW2doXzEwZjZjM2MzYWM1YV1dPjwvVG9Vc2VyTmFtZT4KPEZyb21Vc2VyTmFtZT48IVtDREFUQVtveU9SbnVQOHE3b3UyZ2ZZanFMelNJV1pmMHJzXV0+PC9Gcm9tVXNlck5hbWU+CjxDcmVhdGVUaW1lPjE0MDk3MzU2Njg8L0NyZWF0ZVRpbWU+CjxNc2dUeXBlPjwhW0NEQVRBW3RleHRdXT48L01zZ1R5cGU+CjxDb250ZW50PjwhW0NEQVRBW2FiY2R0ZVRdXT48L0NvbnRlbnQ+CjxNc2dJZD42MDU0NzY4NTkwMDY0NzEzNzI4PC9Nc2dJZD4KPC94bWw+d3gyYzI3NjlmOGVmZDlhYmMy")
 
@@ -38,7 +38,7 @@ func TestAESUseCBCWithPKCS7_Encrypt(t *testing.T) {
 				iv:     testAESKey[:16],
 			},
 			args: args{plain: testPlain},
-			want: testEnceypt,
+			want: testEncrypt,
 		},
 		{
 			name: "fail aes key",
@@ -87,7 +87,7 @@ func TestAESUseCBCWithPKCS7_Decrypt(t *testing.T) {
 				aesKey: testAESKey,
 				iv:     testAESKey[:16],
 			},
-			args: args{encrypt: testEnceypt},
+			args: args{encrypt: testEncrypt},
 			want: testPlain,
 		},
 		{
@@ -96,7 +96,7 @@ func TestAESUseCBCWithPKCS7_Decrypt(t *testing.T) {
 				aesKey: testAESKey[:1],
 				iv:     testAESKey[:16],
 			},
-			args:    args{encrypt: testEnceypt},
+			args:    args{encrypt: testEncrypt},
 			wantErr: true,
 		},
 		{
@@ -105,7 +105,7 @@ func TestAESUseCBCWithPKCS7_Decrypt(t *testing.T) {
 				aesKey: testAESKey,
 				iv:     testAESKey[:16],
 			},
-			args:    args{encrypt: testEnceypt[:32]},
+			args:    args{encrypt: testEncrypt[:32]},
 			wantErr: true,
 		},
 	}
