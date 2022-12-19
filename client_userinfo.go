@@ -27,7 +27,7 @@ type GetUserInfoResponse struct {
 }
 
 // ErrOpenIDEmpty is returned when the OpenID is empty
-var ErrOpenIDEmpty = errors.New("OpenID empty")
+var ErrOpenIDEmpty = errors.New("openID empty")
 
 // GetUserInfo Users Basic Information UnionID
 // see: https://developers.weixin.qq.com/doc/offiaccount/User_Management/Get_users_basic_information_UnionID.html#UinonId
