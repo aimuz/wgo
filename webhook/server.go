@@ -12,8 +12,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-
-	"github.com/aimuz/wgo/xcrypto"
 )
 
 // GetTokenFunc ...
@@ -28,7 +26,7 @@ type Server struct {
 	token         string
 	appID         string
 	aesKey        string
-	crypto        xcrypto.Crypto
+	crypto        WXBizMsgCrypto
 	messageHandle MessageHandle
 }
 
@@ -63,7 +61,7 @@ func NewServer(appid string, opts ...Option) (*Server, error) {
 
 func (s *Server) init() error {
 	if len(s.aesKey) > 0 {
-		c, err := xcrypto.NewWXBizMsgCrypt(s.aesKey, s.appID)
+		c, err := NewWXBizMsgCrypt(s.aesKey, s.appID, s.token)
 		if err != nil {
 			return err
 		}
@@ -90,18 +88,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var msg = encryptMsg.PlainMessage
 	if encrypted {
-		// TODO error message: use WithSafeMode
-		if s.crypto == nil {
-			return
-		}
-		// decrypt payload
-		payload, err = s.crypto.Decrypt(payload)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		err = xml.Unmarshal(payload, &msg)
+		err = s.crypto.DecryptMessage(payload, &msg)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -136,10 +123,21 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case *ArticleMessage:
 	}
 
-	err = xml.NewEncoder(w).Encode(replyMsg)
+	replyPayload, err := xml.Marshal(replyMsg)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	if encrypted {
+		replyPayload, err = s.crypto.EncryptMessage(replyPayload, time.Now().Unix(), "")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	_, _ = fmt.Fprint(w, replyPayload)
 }
 
 // DefaultEchoHandle This is the default Echo Handle, which will be used when WeChat Public sends an authentication request

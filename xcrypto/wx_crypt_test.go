@@ -14,7 +14,7 @@ var xmlPlain = []byte(`<xml><ToUserName><![CDATA[gh_10f6c3c3ac5a]]></ToUserName>
 </xml>`)
 
 func TestWXBizMsgCrypt_Encrypt(t *testing.T) {
-	wxc, err := NewWXBizMsgCrypt("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", "wx2c2769f8efd9abc2")
+	wxc, err := NewWXCrypt("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", "wx2c2769f8efd9abc2")
 	if err != nil {
 		t.Error(err)
 	}
@@ -43,7 +43,7 @@ func TestWXBizMsgCrypt_Encrypt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := &WXBizMsgCrypt{
+			w := &WXCrypt{
 				aesCrypto: tt.fields.aesCrypto,
 				appID:     tt.fields.appID,
 			}
@@ -65,7 +65,7 @@ func TestWXBizMsgCrypt_Encrypt(t *testing.T) {
 }
 
 func TestWXBizMsgCrypt_Decrypt(t *testing.T) {
-	wxc, err := NewWXBizMsgCrypt("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", "wx2c2769f8efd9abc2")
+	wxc, err := NewWXCrypt("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFG", "wx2c2769f8efd9abc2")
 	if err != nil {
 		t.Error(err)
 	}
@@ -96,7 +96,7 @@ func TestWXBizMsgCrypt_Decrypt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := &WXBizMsgCrypt{
+			w := &WXCrypt{
 				aesCrypto: tt.fields.aesCrypto,
 				appID:     tt.fields.appID,
 			}
