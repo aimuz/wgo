@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// PKCS#7 Reference implementation
 // see: https://www.rfc-editor.org/rfc/rfc2315
 
 // ErrPKCS7BlockSizeExceeded is an error that indicates that the block size exceeds the maximum length.
@@ -14,7 +15,7 @@ var ErrPKCS7BlockSizeExceeded = errors.New("pkcs7: block size exceeded")
 // The src parameter is the source byte array. The blockSize parameter is the block size.
 // The dst parameter is the destination byte array. The err return value is an error.
 func PKCS7Padding(src []byte, blockSize int) (dst []byte, err error) {
-	if blockSize < 1 || blockSize >= 256 {
+	if blockSize < 2 || blockSize > 255 {
 		return nil, ErrPKCS7BlockSizeExceeded
 	}
 	padLen := blockSize - len(src)%blockSize
