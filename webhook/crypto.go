@@ -24,7 +24,7 @@ type WXBizMsgCrypto struct {
 
 // NewWXBizMsgCrypto ...
 func NewWXBizMsgCrypto(encodingAESKey, appID, token string) (*WXBizMsgCrypto, error) {
-	c, err := xcrypto.NewWXCrypt(encodingAESKey, appID)
+	c, err := xcrypto.NewWXCrypto(encodingAESKey, appID)
 	if err != nil {
 		return nil, err
 	}
