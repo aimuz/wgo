@@ -30,12 +30,12 @@ func (w *AESUseCBCWithPKCS7) Encrypt(src []byte) (dst []byte, err error) {
 	}
 
 	var blockSize = c.BlockSize()
-	src, err = PKCS7Padding(src, blockSize)
+	dst, err = PKCS7Padding(src, blockSize)
 	if err != nil {
 		return nil, err
 	}
 	encrypter := cipher.NewCBCEncrypter(c, w.iv)
-	encrypter.CryptBlocks(dst, src)
+	encrypter.CryptBlocks(dst, dst)
 	return dst, nil
 }
 
