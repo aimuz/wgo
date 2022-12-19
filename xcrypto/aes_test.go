@@ -53,7 +53,7 @@ func TestAESUseCBCWithPKCS7_Encrypt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := NewAESUseCBCWithPKCS7(tt.fields.aesKey, tt.fields.iv, len(tt.fields.aesKey))
+			w := NewAESUseCBCWithPKCS7(tt.fields.aesKey, tt.fields.iv)
 			got, err := w.Encrypt(tt.args.plain)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Encrypt() error = %v, wantErr %v", err, tt.wantErr)
@@ -111,7 +111,7 @@ func TestAESUseCBCWithPKCS7_Decrypt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := NewAESUseCBCWithPKCS7(tt.fields.aesKey, tt.fields.iv, len(tt.fields.aesKey))
+			w := NewAESUseCBCWithPKCS7(tt.fields.aesKey, tt.fields.iv)
 			got, err := w.Decrypt(tt.args.encrypt)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Decrypt() error = %v, wantErr %v", err, tt.wantErr)
