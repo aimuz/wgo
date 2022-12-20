@@ -5,6 +5,37 @@ import (
 	"testing"
 )
 
+func BenchmarkPKCS7Padding32(b *testing.B) {
+	bs := []byte{1, 2, 3, 4, 5, 6, 7, 8}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		a, err := PKCS7Padding(bs, 32)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = a
+	}
+}
+
+func BenchmarkPKCS7Unpadding32(b *testing.B) {
+	bs := []byte{1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8}
+	bs, err := PKCS7Padding(bs, 32)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		a, err := PKCS7Unpadding(bs)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = a
+	}
+}
+
 func TestPKCS7Padding(t *testing.T) {
 	type args struct {
 		src       []byte

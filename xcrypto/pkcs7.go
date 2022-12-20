@@ -19,8 +19,11 @@ func PKCS7Padding(src []byte, blockSize int) (dst []byte, err error) {
 		return nil, ErrPKCS7BlockSizeExceeded
 	}
 	padLen := blockSize - len(src)%blockSize
-	padding := makePad(padLen)
-	dst = append(src, padding...)
+	dst = make([]byte, len(src)+padLen)
+	copy(dst, src)
+	for i := len(src); i < len(dst); i++ {
+		dst[i] = byte(padLen)
+	}
 	return dst, nil
 }
 
@@ -50,12 +53,4 @@ func PKCS7Unpadding(src []byte) (dst []byte, err error) {
 
 	dst = src[:length-padLen]
 	return dst, nil
-}
-
-func makePad(length int) []byte {
-	nb := make([]byte, length)
-	for i := 0; i < len(nb); i++ {
-		nb[i] = byte(length)
-	}
-	return nb
 }
