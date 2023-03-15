@@ -1,32 +1,46 @@
 package rest
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestResult_Into(t *testing.T) {
-	type fields struct {
-		body       []byte
-		err        error
-		statusCode int
+	// Test success case
+	successBody := []byte(`{"name": "Alice", "age": 30}`)
+	successResult := Result{body: successBody}
+	var successVal struct {
+		Name string `json:"name"`
+		Age  int    `json:"age"`
 	}
-	type args struct {
-		val interface{}
+	err := successResult.Into(&successVal)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := Result{
-				body:       tt.fields.body,
-				err:        tt.fields.err,
-				statusCode: tt.fields.statusCode,
-			}
-			if err := r.Into(tt.args.val); (err != nil) != tt.wantErr {
-				t.Errorf("Into() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+	if successVal.Name != "Alice" || successVal.Age != 30 {
+		t.Errorf("Unexpected value: %#v", successVal)
+	}
+
+	// Test error case
+	errorBody := []byte(`{"errcode": 10001, "errmsg": "Unknown error"}`)
+	errorResult := Result{body: errorBody}
+	var errorVal struct {
+		ErrCode int    `json:"errcode"`
+		ErrMsg  string `json:"errmsg"`
+	}
+	err = errorResult.Into(&errorVal)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if errorVal.ErrCode != 10001 || errorVal.ErrMsg != "Unknown error" {
+		t.Errorf("Unexpected value: %#v", errorVal)
+	}
+
+	// Test error case with Result.err
+	someErr := errors.New("some error")
+	errorResultWithErr := Result{body: errorBody, err: someErr}
+	err = errorResultWithErr.Into(&errorVal)
+	if err != someErr {
+		t.Errorf("Unexpected error: %v", err)
 	}
 }

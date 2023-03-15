@@ -9,7 +9,7 @@ func (c *Client) ClearQuota(ctx context.Context) error {
 		RequestURI("/cgi-bin/clear_quota").
 		Param("appid", c.config.appid).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	return err
 }
 

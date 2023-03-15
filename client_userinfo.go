@@ -41,7 +41,7 @@ func (c *Client) GetUserInfo(ctx context.Context, req *GetUserInfoRequest) (*Get
 		Param("openid", req.OpenID).
 		Param("lang", req.Lang).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	if err != nil {
 		return nil, err
 	}

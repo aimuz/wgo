@@ -40,7 +40,7 @@ func (c *Client) GetQRCode(ctx context.Context, req *GetQRCodeRequest) (*GetQRCo
 		RequestURI("/wxa/getwxacode").
 		Body(req).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (c *Client) GetUnlimitedQRCode(ctx context.Context, req *GetUnlimitedQRCode
 	err := c.NewRequest().Post().
 		Body(req).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (c *Client) CreateQRCode(ctx context.Context, path string, width int) (*Cre
 		Param("path", path).
 		Param("width", strconv.Itoa(width)).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	if err != nil {
 		return nil, err
 	}

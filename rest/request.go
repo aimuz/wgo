@@ -4,14 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
-
-	jsoniter "github.com/json-iterator/go"
 )
 
 // Request ...
@@ -254,36 +251,10 @@ type Result struct {
 	statusCode int
 }
 
-// Error ...
-type Error struct {
-	ErrCode int
-	ErrMsg  string
-}
-
-// Error implements the error interface
-func (e Error) Error() string {
-	return fmt.Sprintf("errCode: %d, errMsg: %s", e.ErrCode, e.ErrMsg)
-}
-
-// NewError ...
-func NewError(errCode int, errMsg string) error {
-	return &Error{
-		ErrCode: errCode,
-		ErrMsg:  errMsg,
-	}
-}
-
 // Into ...
 func (r Result) Into(val interface{}) error {
 	if r.err != nil {
 		return r.err
-	}
-
-	getter := jsoniter.Get(r.body)
-	errCode := getter.Get("errcode").ToInt()
-	if errCode > 0 {
-		errMsg := getter.Get("errmsg").ToString()
-		return NewError(errCode, errMsg)
 	}
 
 	err := json.Unmarshal(r.body, val)

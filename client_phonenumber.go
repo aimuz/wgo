@@ -28,7 +28,7 @@ func (c *Client) GetPhoneNumber(ctx context.Context, code string) (*GetPhoneNumb
 		RequestURI("/wxa/business/getuserphonenumber").
 		Param("code", code).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	if err != nil {
 		return nil, err
 	}

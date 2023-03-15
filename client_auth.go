@@ -48,7 +48,7 @@ func (c *Client) GetAccessTokenWithGrantType(ctx context.Context, gt GrantType) 
 		Param("secret", c.config.secret).
 		Param("grant_type", string(gt)).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (c *Client) CheckSessionKey(ctx context.Context, openID, signature string, 
 		Param("signature", signature).
 		Param("sig_method", string(sigMethod)).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	return err
 }
 
@@ -136,7 +136,7 @@ func (c *Client) Code2Session(ctx context.Context, code string) (*Code2SessionRe
 		Param("js_code", code).
 		Param("grant_type", string(GrantTypeAuthorizationCode)).
 		Do(ctx).
-		Into(&resp)
+		Into(NewJSONValidator(&resp))
 	if err != nil {
 		return nil, err
 	}
