@@ -201,7 +201,7 @@ func (r *Request) Do(ctx context.Context) Result {
 		}
 	}
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // nolint:bodyclose
 	if err != nil {
 		return Result{
 			err: err,

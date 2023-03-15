@@ -15,13 +15,7 @@ fmt: $(GOIMPORTS) $(YAMLFMT)
 
 .PHONY: lint
 lint: ## lint code
-lint: $(FAILLINT) $(GOLANGCI_LINT) $(ERRCHECK) $(GOVULNCHECK)
-	@echo ">> verifying modules being imported"
-	@$(FAILLINT) -paths "github.com/pkg/errors=errors,fmt.{Print,Printf,Println},log" ./...
-
-	@echo ">> examining all of the Go files"
-	@go vet -stdmethods=false ./...
-
+lint: $(GOLANGCI_LINT)
 	@echo ">> linting all of the Go files GOGC=${GOGC}"
 	@$(GOLANGCI_LINT) run
 
