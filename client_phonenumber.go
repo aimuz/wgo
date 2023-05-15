@@ -18,7 +18,7 @@ type PhoneInfo struct {
 // PhoneInfoWatermark ...
 type PhoneInfoWatermark struct {
 	Timestamp int    `json:"timestamp"`
-	Appid     string `json:"appid"`
+	AppID     string `json:"appid"`
 }
 
 // GetPhoneNumber ...
