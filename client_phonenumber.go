@@ -30,7 +30,7 @@ type PhoneInfoWatermark struct {
 	AppID string `json:"appid"`
 }
 
-type GetPhoneNumber struct {
+type getPhoneNumber struct {
 	Code string `json:"code"`
 }
 
@@ -40,7 +40,7 @@ func (c *Client) GetPhoneNumber(ctx context.Context, code string) (*GetPhoneNumb
 	resp := GetPhoneNumberResponse{}
 	err := c.NewRequest().Post().
 		RequestURI("/wxa/business/getuserphonenumber").
-		Body(GetPhoneNumber{Code: code}).
+		Body(getPhoneNumber{Code: code}).
 		Do(ctx).
 		Into(NewJSONValidator(&resp))
 	if err != nil {
