@@ -21,20 +21,23 @@ import (
 
 // Error ...
 type Error struct {
-	ErrCode int    `json:"errcode"`
-	ErrMsg  string `json:"errmsg"`
+	Code int    `json:"errcode"`
+	Msg  string `json:"errmsg"`
+	Err  error  `json:"-"`
 }
 
+func (e *Error) Unwrap() error { return e.Err }
+
 // Error implements the error interface
-func (e Error) Error() string {
-	return fmt.Sprintf("errCode: %d, errMsg: %s", e.ErrCode, e.ErrMsg)
+func (e *Error) Error() string {
+	return fmt.Sprintf("errCode: %d, errMsg: %s", e.Code, e.Msg)
 }
 
 // NewError ...
 func NewError(errCode int, errMsg string) error {
 	return &Error{
-		ErrCode: errCode,
-		ErrMsg:  errMsg,
+		Code: errCode,
+		Msg:  errMsg,
 	}
 }
 
@@ -55,9 +58,12 @@ type JSONValidator struct {
 func (r *JSONValidator) UnmarshalJSON(body []byte) error {
 	var e Error
 	if err := json.Unmarshal(body, &e); err == nil {
-		if e.ErrCode > 0 {
+		if e.Code > 0 {
 			return &e
 		}
+	}
+	if r.val == nil {
+		return nil
 	}
 	return json.Unmarshal(body, r.val)
 }

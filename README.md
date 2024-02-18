@@ -16,11 +16,15 @@ Usage
 ### Client
 
 ```go
-import "github.com/aimuz/wgo"
-```
+package main
 
-```go
-client := wgo.NewClient(wgo.WithAPPIDAndSecret("<APPID>", "<SECRET>"))
+import "github.com/aimuz/wgo"
+
+func main() {
+	client := wgo.NewClient( < appid >)
+	client := wgo.NewClientWithSecret( < appid >, < secret >)
+}
+
 ```
 
 Roadmap

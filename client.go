@@ -7,7 +7,7 @@ import (
 	"github.com/aimuz/wgo/rest"
 )
 
-const apiBase = "https://api.weixin.qq.com"
+const defaultBaseURL = "https://api.weixin.qq.com"
 
 // Client is a WGo client.
 type Client struct {
@@ -21,14 +21,13 @@ type ClientOption func(*clientConfig)
 type clientConfig struct {
 	appid  string
 	secret string
-	token  string
 
 	hc *http.Client
 }
 
 // NewClient ...
-func NewClient(opts ...ClientOption) *Client {
-	base, _ := url.Parse(apiBase)
+func NewClient(appid string, opts ...ClientOption) *Client {
+	base, _ := url.Parse(defaultBaseURL)
 	c := &Client{
 		base: base,
 		config: clientConfig{
@@ -41,10 +40,13 @@ func NewClient(opts ...ClientOption) *Client {
 	return c
 }
 
-// WithAPPIDAndSecret sets the appid and secret for the WGo client
-func WithAPPIDAndSecret(appid string, secret string) ClientOption {
+// NewClientWithSecret ...
+func NewClientWithSecret(appid string, secret string, opts ...ClientOption) *Client {
+	return NewClient(appid, append(opts, WithSecret(secret))...)
+}
+
+func WithSecret(secret string) ClientOption {
 	return func(c *clientConfig) {
-		c.appid = appid
 		c.secret = secret
 	}
 }
@@ -52,7 +54,16 @@ func WithAPPIDAndSecret(appid string, secret string) ClientOption {
 // WithToken sets the token for the WGo client
 func WithToken(token string) ClientOption {
 	return func(c *clientConfig) {
-		c.token = token
+		transport := c.hc.Transport
+		if transport == nil {
+			transport = http.DefaultTransport
+		}
+		c.hc.Transport = &RoundTripper{
+			next: transport,
+			TokenSource: tokenSourceFunc(func() (*Token, error) {
+				return &Token{AccessToken: token}, nil
+			}),
+		}
 	}
 }
 
@@ -66,16 +77,16 @@ func WithHTTPClient(client *http.Client) ClientOption {
 // WithTokenSource sets the token source for the WGo client
 func WithTokenSource(tokenSource TokenSource) ClientOption {
 	return func(c *clientConfig) {
-		c.hc = &http.Client{
-			Transport: &RoundTripper{
-				next:        http.DefaultTransport,
-				TokenSource: tokenSource,
-			},
+		transport := c.hc.Transport
+		if transport == nil {
+			transport = http.DefaultTransport
+		}
+		c.hc.Transport = &RoundTripper{
+			next:        transport,
+			TokenSource: tokenSource,
 		}
 	}
 }
 
 // NewRequest creates a new request
-func (c *Client) NewRequest() *rest.Request {
-	return rest.NewRequest(c.base, c.config.hc)
-}
+func (c *Client) NewRequest() *rest.Request { return rest.NewRequest(c.base, c.config.hc) }

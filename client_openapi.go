@@ -74,7 +74,7 @@ func (c *Client) ClearQuotaByAppSecret(ctx context.Context) error {
 	err := c.NewRequest().Post().
 		RequestURI("/cgi-bin/clear_quota/v2").
 		Param("appid", c.config.appid).
-		Param("appsecret", c.config.secret).
+		//Param("appsecret", c.config.secret).
 		Do(ctx).
 		Into(&resp)
 	return err

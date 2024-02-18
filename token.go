@@ -16,6 +16,12 @@ type TokenSource interface {
 	Token() (*Token, error)
 }
 
+type tokenSourceFunc func() (*Token, error)
+
+func (f tokenSourceFunc) Token() (*Token, error) {
+	return f()
+}
+
 // Token represents the credentials used to authorize
 // the requests to access protected resources on the OAuth 2.0
 // provider's backend.

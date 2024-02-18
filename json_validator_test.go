@@ -53,7 +53,7 @@ func TestJSONValidator_UnmarshalJSON(t *testing.T) {
 			name:       "With error",
 			jsonData:   []byte(`{"errcode": 123, "errmsg": "Oops"}`),
 			expectData: &Example{},
-			expectErr:  &Error{ErrCode: 123, ErrMsg: "Oops"},
+			expectErr:  &Error{Code: 123, Msg: "Oops"},
 		},
 	}
 

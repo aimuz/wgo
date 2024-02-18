@@ -5,76 +5,31 @@ import (
 	"errors"
 )
 
-// GrantType ...
+// GrantType 授权类型
 type GrantType string
 
 const (
-	// GrantTypeClientCredential ...
+	// GrantTypeClientCredential 获取 AccessToken 使用该值
 	GrantTypeClientCredential GrantType = "client_credential"
-	// GrantTypeAuthorizationCode ...
+
+	// GrantTypeAuthorizationCode 小程序登录使用该类型
 	GrantTypeAuthorizationCode GrantType = "authorization_code"
 )
-
-// ErrInvalidGrantType is returned when an grant type is invalid
-var ErrInvalidGrantType = errors.New("invalid grant type")
-
-// IsValid checks GetAccessToken grant_type
-func (gt GrantType) IsValid() error {
-	if gt == GrantTypeClientCredential {
-		return nil
-	}
-	return ErrInvalidGrantType
-}
-
-// AccessTokenResponse is the response to an GetAccessToken
-type AccessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
-}
-
-// GetAccessTokenWithGrantType Obtains the globally unique credential (`access_token`) for calling backend APIs on Mini Programs.
-//
-//	The access_token is required for calls to most backend APIs. Developers need to save it properly.
-//	see: https://developers.weixin.qq.com/miniprogram/en/dev/api-backend/open-api/access-token/auth.getAccessToken.html
-func (c *Client) GetAccessTokenWithGrantType(ctx context.Context, gt GrantType) (*AccessTokenResponse, error) {
-	if err := gt.IsValid(); err != nil {
-		return nil, err
-	}
-
-	resp := AccessTokenResponse{}
-	err := c.NewRequest().Get().
-		RequestURI("/cgi-bin/token").
-		Param("appid", c.config.appid).
-		Param("secret", c.config.secret).
-		Param("grant_type", string(gt)).
-		Do(ctx).
-		Into(NewJSONValidator(&resp))
-	if err != nil {
-		return nil, err
-	}
-	return &resp, err
-}
-
-// GetAccessToken Obtains the globally unique credential (`access_token`) for calling backend APIs on Mini Programs.
-//
-//	The access_token is required for calls to most backend APIs. Developers need to save it properly.
-//	see: https://developers.weixin.qq.com/miniprogram/en/dev/api-backend/open-api/access-token/auth.getAccessToken.html
-func (c *Client) GetAccessToken(ctx context.Context) (*AccessTokenResponse, error) {
-	return c.GetAccessTokenWithGrantType(ctx, GrantTypeClientCredential)
-}
 
 // SignType ...
 type SignType string
 
 const (
 	// SignTypeHMACSHA1 ...
+	// Deprecated: Suggested Use [SignTypeHMACSHA256]
 	SignTypeHMACSHA1 SignType = "hmac_sha1"
+
 	// SignTypeHMACSHA256 ...
 	SignTypeHMACSHA256 SignType = "hmac_sha256"
 )
 
 // ErrInvalidSignType is returned when sign type is invalid
-var ErrInvalidSignType = errors.New("invalid sign type")
+var ErrInvalidSignType = errors.New("wgo: invalid sign type")
 
 // IsValid checks CheckSessionKey sig_method
 func (st SignType) IsValid() error {
@@ -85,34 +40,29 @@ func (st SignType) IsValid() error {
 	return ErrInvalidSignType
 }
 
-// CheckSessionKey Verifies whether the `session_key` of the login status saved on the server is legal.
-//
-//	To ensure the confidentiality of the `session_key`, the API does not transmit the session_key in clear text.
-//	Rather, it checks the login status signature.
-//	see: https://developers.weixin.qq.com/minigame/en/dev/api-backend/open-api/login/auth.checkSessionKey.html
-func (c *Client) CheckSessionKey(ctx context.Context, openID, signature string, sigMethod SignType) error {
-	if err := sigMethod.IsValid(); err != nil {
+// CheckSessionKey 校验服务器所保存的登录态 session_key 是否合法。
+// 为了保持 session_key 私密性，接口不明文传输 session_key，而是通过校验登录态签名完成。
+// see: https://developers.weixin.qq.com/minigame/dev/api-backend/open-api/login/auth.checkSessionKey.html
+func (c *Client) CheckSessionKey(ctx context.Context, openID, signature string) error {
+	return c.CheckSessionKeyWithSignType(ctx, openID, signature, SignTypeHMACSHA256)
+}
+
+// CheckSessionKeyWithSignType 校验服务器所保存的登录态 session_key 是否合法。
+// 为了保持 session_key 私密性，接口不明文传输 session_key，而是通过校验登录态签名完成。
+// see: https://developers.weixin.qq.com/minigame/dev/api-backend/open-api/login/auth.checkSessionKey.html
+func (c *Client) CheckSessionKeyWithSignType(ctx context.Context, openID, signature string, st SignType) error {
+	if err := st.IsValid(); err != nil {
 		return err
 	}
 
-	resp := struct{}{}
 	err := c.NewRequest().Get().
 		RequestURI("/wxa/checksession").
 		Param("openid", openID).
 		Param("signature", signature).
-		Param("sig_method", string(sigMethod)).
+		Param("sig_method", string(st)).
 		Do(ctx).
-		Into(NewJSONValidator(&resp))
+		Into(NewJSONValidator(nil))
 	return err
-}
-
-// CheckSessionKeyWithHMACSHA256 Verifies whether the `session_key` of the login status saved on the server is legal.
-//
-//	To ensure the confidentiality of the `session_key`, the API does not transmit the session_key in clear text.
-//	Rather, it checks the login status signature.
-//	see: https://developers.weixin.qq.com/minigame/en/dev/api-backend/open-api/login/auth.checkSessionKey.html
-func (c *Client) CheckSessionKeyWithHMACSHA256(ctx context.Context, openID, signature string) error {
-	return c.CheckSessionKey(ctx, openID, signature, SignTypeHMACSHA256)
 }
 
 // Code2SessionResponse is the response to an Code2Session
@@ -122,17 +72,15 @@ type Code2SessionResponse struct {
 	UnionID    string `json:"unionid"`
 }
 
-// Code2Session Verifies the login credential.
-//
-//	The temporary login credential code is obtained via the wx.login API and passed into WeChat DevTools,
-//	which calls this API to complete the login procedure. For more usages, see Mini Program Login.
-//	see: https://developers.weixin.qq.com/miniprogram/en/dev/api-backend/open-api/login/auth.code2Session.html
+// Code2Session 登录凭证校验。
+// 通过 wx.login 接口获得临时登录凭证 code 后传到开发者服务器调用此接口完成登录流程。
+// see: https://developers.weixin.qq.com/minigame/dev/api-backend/open-api/login/auth.code2Session.html
 func (c *Client) Code2Session(ctx context.Context, code string) (*Code2SessionResponse, error) {
 	resp := Code2SessionResponse{}
 	err := c.NewRequest().Get().
 		RequestURI("/sns/jscode2session").
 		Param("appid", c.config.appid).
-		Param("secret", c.config.secret).
+		//Param("secret", c.config.secret).
 		Param("js_code", code).
 		Param("grant_type", string(GrantTypeAuthorizationCode)).
 		Do(ctx).
